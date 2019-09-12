@@ -5,4 +5,5 @@
                         'Elixir.Project2.Supervisor',
                         'Elixir.Project2.Topology']},
               {registered,[]},
-              {vsn,"0.1.0"}]}.
+              {vsn,"0.1.0"},
+              {mod,{'Elixir.Project2',[]}}]}.
