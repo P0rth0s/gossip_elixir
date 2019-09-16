@@ -7,9 +7,9 @@ defmodule Project2.Supervisor do
 
     def init(_) do
         children = [
-            worker(Project2.Server, [])
+            {DynamicSupervisor, strategy: :one_for_one, name: Project2.DynamicSupervisor}
         ]
 
-        supervise(children, strategy: :one_for_one)
+        Supervisor.init(children, strategy: :one_for_one)
     end
 end

@@ -3,15 +3,15 @@ defmodule Project2.Server do
 
     def start_link do
         #Get rid of name and call by pid as scale up
-        GenServer.start_link(__MODULE__, [], name: :my_server)
+        GenServer.start_link(__MODULE__, [])
     end
 
-    def do_gossip() do
-        GenServer.call(:my_server, :gossip)
+    def do_gossip(pid) do
+        GenServer.call(pid, :gossip)
     end
 
-    def do_push_sum() do
-        GenServer.call(:my_server, :push_sum)
+    def do_push_sum(pid) do
+        GenServer.call(pid, :push_sum)
     end
 
     def init(state) do
