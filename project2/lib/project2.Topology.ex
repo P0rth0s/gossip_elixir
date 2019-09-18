@@ -12,8 +12,10 @@ defmodule Project2.Topology do
     end
 
     def full_network(worker_list) do
-        [hd | tl] = worker_list
-        Project2.Server.add_neighbors(hd, tl)
+        Enum.map(worker_list, fn worker ->
+            neighbor_list = worker_list -- [ worker ]
+            Project2.Server.add_neighbors(worker, neighbor_list)
+        end)
     end
 
     def line(_worker_list) do
