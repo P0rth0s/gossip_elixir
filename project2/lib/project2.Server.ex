@@ -3,15 +3,19 @@ defmodule Project2.Server do
 
     def start_link do
         #Get rid of name and call by pid as scale up
-        GenServer.start_link(__MODULE__, [], name: :my_server)
+        GenServer.start_link(__MODULE__, %{})
     end
 
-    def do_gossip() do
-        GenServer.call(:my_server, :gossip)
+    def do_gossip(pid) do
+        GenServer.call(pid, :gossip)
     end
 
-    def do_push_sum() do
-        GenServer.call(:my_server, :push_sum)
+    def do_push_sum(pid) do
+        GenServer.call(pid, :push_sum)
+    end
+
+    def add_neighbors(pid, list) do
+        GenServer.cast(pid, {:add_neighbors, list})
     end
 
     def init(state) do
@@ -27,4 +31,13 @@ defmodule Project2.Server do
         IO.puts 'push sum'
         {:reply, state, state}
     end
+
+    def handle_cast({:add_neighbors, list}, state) do
+        neighbors = Map.fetch(state, :neighbors)
+        Map.delete(state, :neighbors)
+        neighbors = [list | neighbors]
+        Map.put(state, :neighbors, neighbors)
+        {:noreply, state}
+    end
+
 end
