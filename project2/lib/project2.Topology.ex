@@ -12,9 +12,8 @@ defmodule Project2.Topology do
     end
 
     def full_network(worker_list) do
-        IO.puts 'hi'
         [hd | tl] = worker_list
-        Project2.Server.add_neighbors(hd, worker_list)
+        Project2.Server.add_neighbors(hd, tl)
     end
 
     def line(_worker_list) do
