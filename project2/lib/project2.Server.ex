@@ -14,6 +14,10 @@ defmodule Project2.Server do
         GenServer.call(pid, :push_sum)
     end
 
+    def add_neighbors(pid, list) do
+        GenServer.call(pid, {:add_neighbors, list})
+    end
+
     def init(state) do
         {:ok, state}
     end
@@ -27,4 +31,11 @@ defmodule Project2.Server do
         IO.puts 'push sum'
         {:reply, state, state}
     end
+
+    def handle_cast({:add_neighbors, list}, _from, state) do
+        IO.puts 'state changed'
+        state = [list | state]
+        {:reply, state, state}
+    end
+
 end

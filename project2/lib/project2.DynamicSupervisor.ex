@@ -1,32 +1,24 @@
 defmodule Project2.DynamicSupervisor do
   use DynamicSupervisor
 
-  def start_link(init_arg) do
-    DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  def start_link() do
+    DynamicSupervisor.start_link(__MODULE__, name: __MODULE__)
   end
-  #Implement worker generation correctly
-  """
-  def start_child() do
-    #spec = %{id: Project2.Server, start: {Project2.Server, :start_link, []}}
-    #spec = {Project2.Server.start_link, []}
-    DynamicSupervisor.start_child(__MODULE__, Project2.Server)
+
+  def start_child(id_num) do
+    spec = %{id: id_num, start: {Project2.Server, :start_link, []}}
+    DynamicSupervisor.start_child(__MODULE__, spec)
   end
-  """
 
   def init(_) do
-    DynamicSupervisor.init(strategy: :one_for_one)
-
-    #get num workers from argv
-    create_workers([], 100)
-
-    #get topology from argv
-    #Preferably send calls to set state of node with neighbors while building graph
-    Project2.Topology.build_topology("topology")
+    DynamicSupervisor.init(
+      strategy: :one_for_one
+    )
   end
 
   def create_workers(list, 0) do list end
   def create_workers(list, num) do
-    agent = Project2.Server.start_link()
+    agent = start_child(num)
     case agent do
       {:ok, pid} ->
         newlist = [pid | list]
@@ -36,5 +28,11 @@ defmodule Project2.DynamicSupervisor do
         IO.puts 'Error creating worker, Retrying'
         create_workers(list, num)
     end
+  end
+
+  def do_stuff do
+    #Get vars from argv
+    worker_list = create_workers([], 4)
+    Project2.Topology.build_topology("full network", worker_list)
   end
 end
