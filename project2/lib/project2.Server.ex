@@ -3,7 +3,7 @@ defmodule Project2.Server do
 
     def start_link do
         #Get rid of name and call by pid as scale up
-        GenServer.start_link(__MODULE__, %{times_heard_rumor: 0})
+        GenServer.start_link(__MODULE__, %{times_heard_rumor: 0, neighbors: []})
     end
 
     def do_push_sum(pid) do
@@ -16,6 +16,10 @@ defmodule Project2.Server do
 
     def add_neighbors(pid, list) do
         GenServer.cast(pid, {:add_neighbors, list})
+    end
+
+    def get_neighbors(pid) do
+        GenServer.call(pid, :get_neighbors)
     end
 
     #Project2.Topology.build_topology/1 must be called first
@@ -40,16 +44,15 @@ defmodule Project2.Server do
         {:reply, state, state}
     end
 
-    #Not tested
     def handle_call(:gossip, _from, state) do
-        count = Map.fetch(state, :times_heard_rumor)
-        #cnt = count + 1 #This throws err for some reason
-        Map.put(state, :times_heard_rumor, count) #Change to cnt
+        count = elem(Map.fetch(state, :times_heard_rumor), 1)
+        count = count + 1
+        Map.put(state, :times_heard_rumor, count)
         cond do
-            count < 10 -> #Change to cnt
+            count < 10 ->
                 IO.puts 'continue'
-                pid = Enum.random(Map.fetch(state, :neighbors))
-                do_gossip(pid)
+                #pid = Enum.random(Map.fetch(state, :neighbors))
+                #do_gossip(pid)
             true ->
                 IO.puts 'done'
                 # remove from neighbor list of others?
@@ -57,11 +60,16 @@ defmodule Project2.Server do
         {:reply, count, state}
     end
 
+    def handle_call(:get_neighbors, _from, state) do
+        neighbors = Map.fetch(state, :neighbors)
+        {:reply, neighbors, state}
+    end
+
+    #Error adding neighbors
     def handle_cast({:add_neighbors, list}, state) do
         neighbors = Map.fetch(state, :neighbors)
         Map.delete(state, :neighbors)
         neighbors = [list | neighbors]
-        #List.flatten(neighbors) this throws err but should happen i think?
         Map.put(state, :neighbors, neighbors)
         {:noreply, state}
     end
