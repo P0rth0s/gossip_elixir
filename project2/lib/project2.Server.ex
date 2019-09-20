@@ -51,7 +51,7 @@ defmodule Project2.Server do
         cond do
             count < 10 ->
                 IO.puts 'continue'
-                #pid = Enum.random(Map.fetch(state, :neighbors))
+                #pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
                 #do_gossip(pid)
             true ->
                 IO.puts 'done'
@@ -65,12 +65,11 @@ defmodule Project2.Server do
         {:reply, neighbors, state}
     end
 
-    #Error adding neighbors
     def handle_cast({:add_neighbors, list}, state) do
-        neighbors = Map.fetch(state, :neighbors)
-        Map.delete(state, :neighbors)
+        neighbors = elem(Map.fetch(state, :neighbors), 1)
+        #Map.delete(state, :neighbors)
         neighbors = [list | neighbors]
-        Map.put(state, :neighbors, neighbors)
+        state = Map.put(state, :neighbors, neighbors)
         {:noreply, state}
     end
 
