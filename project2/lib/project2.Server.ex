@@ -2,7 +2,6 @@ defmodule Project2.Server do
     use GenServer
 
     def start_link do
-        #Get rid of name and call by pid as scale up
         GenServer.start_link(__MODULE__, %{times_heard_rumor: 0, neighbors: []})
     end
 
@@ -11,7 +10,7 @@ defmodule Project2.Server do
     end
 
     def do_gossip(pid) do
-        GenServer.call(pid, :gossip)
+        GenServer.cast(pid, {:gossip, "My Message"})
     end
 
     def add_neighbors(pid, list) do
@@ -44,31 +43,32 @@ defmodule Project2.Server do
         {:reply, state, state}
     end
 
-    def handle_call(:gossip, _from, state) do
-        count = elem(Map.fetch(state, :times_heard_rumor), 1)
-        count = count + 1
-        Map.put(state, :times_heard_rumor, count)
-        cond do
-            count < 10 ->
-                IO.puts 'continue'
-                #pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
-                #do_gossip(pid)
-            true ->
-                IO.puts 'done'
-                # remove from neighbor list of others?
-        end
-        {:reply, count, state}
-    end
-
     def handle_call(:get_neighbors, _from, state) do
         neighbors = Map.fetch(state, :neighbors)
         {:reply, neighbors, state}
     end
 
+    #Make msg not call so can recursively call with do_gossip and avoid timeout
+    def handle_cast({:gossip, _msg}, state) do
+        count = elem(Map.fetch(state, :times_heard_rumor), 1)
+        count = count + 1
+        state = Map.put(state, :times_heard_rumor, count)
+        cond do
+            count < 10 ->
+                IO.puts 'continue'
+                pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
+                do_gossip(pid)
+            true ->
+                IO.puts 'done'
+                # remove from neighbor list of others?
+        end
+        {:noreply, state}
+    end
+
     def handle_cast({:add_neighbors, list}, state) do
         neighbors = elem(Map.fetch(state, :neighbors), 1)
-        #Map.delete(state, :neighbors)
         neighbors = [list | neighbors]
+        neighbors = List.flatten(neighbors)
         state = Map.put(state, :neighbors, neighbors)
         {:noreply, state}
     end

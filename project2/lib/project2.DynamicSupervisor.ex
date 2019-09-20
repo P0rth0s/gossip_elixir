@@ -32,7 +32,7 @@ defmodule Project2.DynamicSupervisor do
 
   def do_stuff do
     #Get vars from argv
-    worker_list = create_workers([], 20)
+    worker_list = create_workers([], 4)
     Project2.Topology.build_topology("full network", worker_list)
     #[hd | _tl] = worker_list
     #Project2.Server.get_neighbors(hd)
