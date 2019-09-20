@@ -18,7 +18,10 @@ defmodule Project2.Topology do
         end)
     end
 
-    def line(_worker_list) do
+    def line(worker_list) do
+        [hd, li | tl] = worker_list
+        Project2.Server.add_neighbors(hd, [li])
+        line([li | tl])
     end
 
     def random_2d_grid(_worker_list) do
