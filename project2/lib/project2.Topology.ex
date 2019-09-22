@@ -31,10 +31,12 @@ defmodule Project2.Topology do
     end
 
     def random_2d_grid(_worker_list) do
-
+        _x = Enum.random(100)
+        _y = Enum.random(100)
     end
 
     def torus_grid_3d(_worker_list) do
+        #Cube but ends wrap?
     end
 
     def honey_comb(_worker_list) do

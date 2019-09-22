@@ -36,6 +36,6 @@ defmodule Project2.DynamicSupervisor do
     Project2.Topology.build_topology("full network", worker_list)
     #[hd | _tl] = worker_list
     #Project2.Server.get_neighbors(hd)
-    Project2.Server.begin_algorithm("Gossip", worker_list)
+    Project2.Server.begin_algorithm("Push Sum", worker_list)
   end
 end
