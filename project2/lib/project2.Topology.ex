@@ -12,11 +12,22 @@ defmodule Project2.Topology do
     end
 
     def full_network(worker_list) do
-        [hd | tl] = worker_list
-        Project2.Server.add_neighbors(hd, tl)
+        Enum.map(worker_list, fn worker ->
+            neighbor_list = worker_list -- [ worker ]
+            Project2.Server.add_neighbors(worker, neighbor_list)
+        end)
     end
 
-    def line(_worker_list) do
+    #Not working err on flatten
+    def line(worker_list) do
+        [hd, li | tl] = worker_list
+        Project2.Server.add_neighbors(hd, [li])
+        line([li | tl], hd)
+    end
+    def line(worker_list, previous) do
+        [hd, li | tl] = worker_list
+        Project2.Server.add_neighbors(hd, [previous | li])
+        line([li | tl], hd)
     end
 
     def random_2d_grid(_worker_list) do
