@@ -18,16 +18,22 @@ defmodule Project2.Topology do
         end)
     end
 
-    #Not working err on flatten
     def line(worker_list) do
         [hd, li | tl] = worker_list
         Project2.Server.add_neighbors(hd, [li])
         line([li | tl], hd)
     end
     def line(worker_list, previous) do
-        [hd, li | tl] = worker_list
-        Project2.Server.add_neighbors(hd, [previous | li])
-        line([li | tl], hd)
+        case worker_list do
+            [hd, li | tl] ->
+                Project2.Server.add_neighbors(hd, [previous, li | []])
+                line([li | tl], hd)
+            [hd | []] ->
+                Project2.Server.add_neighbors(hd, [previous])
+            _ ->
+                #Should be unreachable
+                :done
+        end
     end
 
     def random_2d_grid(_worker_list) do
