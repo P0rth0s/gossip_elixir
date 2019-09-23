@@ -30,19 +30,26 @@ defmodule Project2.Topology do
                 line([li | tl], hd)
             [hd | []] ->
                 Project2.Server.add_neighbors(hd, [previous])
-            _ ->
-                #Should be unreachable
-                :done
         end
     end
 
-    def random_2d_grid(_worker_list) do
-        _x = Enum.random(100)
-        _y = Enum.random(100)
+    def random_2d_grid(worker_list) do
+        worker_locations = Enum.map(worker_list, fn worker ->
+            %{pid: worker, x: :rand.uniform(1000), y: :rand.uniform(1000)} #.1 = 10
+        end)
+        worker_locations = Enum.sort_by worker_locations, &Map.fetch(&1, :x)
+        #Enum.map(worker_locations, fn worker ->
+        #end)
+        x_diff = 0
+        y_diff = 0
+        distance = :math.sqrt(:math.pow(x_diff, 2) + :math.pow(y_diff, 2))
+        #Search in bands across graph?
+        #Get neighbor list
+        #Send neighbor list
     end
 
     def torus_grid_3d(_worker_list) do
-        #Cube but ends wrap?
+        #Cube but ends wrap
     end
 
     def honey_comb(_worker_list) do

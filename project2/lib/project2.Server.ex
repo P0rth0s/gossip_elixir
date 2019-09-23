@@ -2,11 +2,22 @@ defmodule Project2.Server do
     use GenServer
 
     def start_link do
-        GenServer.start_link(__MODULE__, %{times_heard_rumor: 0, neighbors: [], w: 1, s: 1, push_sum_history: []})
+        GenServer.start_link(__MODULE__, %{times_heard_rumor: 0, neighbors: [], w: 1, s: -1, push_sum_history: []})
     end
 
     def do_push_sum(pid, s, w) do
         GenServer.cast(pid, {:push_sum, s, w})
+    end
+
+    def init_push_sum(worker_list, index) do
+        case worker_list do
+            [] ->
+                :done
+            [hd | tl] ->
+                GenServer.cast(hd, {:init_push_sum, index})
+                index = index + 1
+                init_push_sum(tl, index)
+        end
     end
 
     def do_gossip(pid) do
@@ -28,6 +39,7 @@ defmodule Project2.Server do
             "Gossip" ->
                 do_gossip(pid)
             "Push Sum"->
+                init_push_sum(worker_list, 1)
                 do_push_sum(pid, 0, 0)
             _ -> IO.puts 'Invalid algorithm'
         end
@@ -67,6 +79,11 @@ defmodule Project2.Server do
         {:noreply, state}
     end
 
+    def handle_cast({:init_push_sum, s}, state) do
+        state = Map.put(state, :s, s)
+        {:noreply, state}
+    end
+
     @push_sum_difference :math.pow(10, -10)
     def handle_cast({:push_sum, s, w}, state) do
         my_s = elem(Map.fetch(state, :s), 1) + s
@@ -79,6 +96,7 @@ defmodule Project2.Server do
             [_hd, _snd, thrd | _] ->
                 cond do
                     sum_estimate - thrd < @push_sum_difference ->
+                        IO.puts 'continue'
                         state = continue_push_sum(state, my_s, my_w)
                         {:noreply, state}
                     true ->
