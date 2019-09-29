@@ -48,13 +48,37 @@ defmodule Project2.Topology do
         #Send neighbor list
     end
 
-    def torus_grid_3d(_worker_list) do
+    def torus_grid_3d(worker_list) do
         #Cube but ends wrap
+        len = Integer.floor_div(length(worker_list), 8)
+        for i <- [0..Kernel.trunc(len)] do: #
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-5, len)))
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+3, len)))
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-3, len)))
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-1, len)))
+        end
     end
 
     def honey_comb(_worker_list) do
+        len = Integer.floor_div(length(worker_list), 8)
+        for i <- [0..Kernel.trunc(len)] do:
+            cond do:
+                rem(1, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
+                rem(I, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
+            end#
+        end
     end
 
     def honey_comb_random(_worker_list) do
+        len = Integer.floor_div(length(worker_list), 8)
+        for i <- [0..Kernel.trunc(len)] do:
+            cond do:
+                rem(1, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
+                rem(I, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
+                _ -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.random(worker_list)
+            end#
+        end
     end
 end
