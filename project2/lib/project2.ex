@@ -8,7 +8,7 @@ defmodule Project2 do
         worker_list = Project2.DynamicSupervisor.create_workers([], num_nodes)
         Project2.Topology.build_topology(topology, worker_list)
         Project2.Server.begin_algorithm(algorithm, worker_list)
-        #TODO Keep alive till all DynamicSupervisor children die
+        loop(num_nodes)
       _ ->
         IO.puts 'Please put args num_nodes, topology, algorithm'
     end
@@ -23,7 +23,6 @@ defmodule Project2 do
         Project2.Topology.build_topology(topology, worker_list)
         Project2.Server.begin_algorithm(algorithm, worker_list)
         loop(num_nodes)
-        #TODO Keep alive till all DynamicSupervisor children die
       _ ->
         IO.puts 'Please put args num_nodes, topology, algorithm'
     end
