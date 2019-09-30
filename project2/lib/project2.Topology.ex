@@ -79,30 +79,52 @@ defmodule Project2.Topology do
         end
     end
 
-    defp grid_connect(list) do
-        :ok
-    end
+    defp grid_connect(list), do: :ok
+
+    defp roots(p), do: (1.0+math.sqrt(1.0+8.0*p))/4.0
 
     def honey_comb(worker_list) do
         len = Integer.floor_div(length(worker_list), 8)
-        for i <- [0..Kernel.trunc(len)] do
-            cond do
-                rem(i, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
-            end
-            cond do
-                rem(i, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
-            end
+        m = roots(len)
+        n = 2*m-1
+        chunks = Enum.chunk_every(worker_list, n) # m chunks of length n
+        for i <- [1..m-1] do #build one hexagon at a time, overlapping on one edge
+            zip_hexagons(Enum.at(chunks, i), Enum.at(chunks, i-1))
         end
+        # for i <- [0..Kernel.trunc(len)] do
+        #     cond do
+        #         rem(i, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
+        #     end
+        #     cond do
+        #         rem(i, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
+        #     end
+        # end
     end
 
     def honey_comb_random(worker_list) do
         len = Integer.floor_div(length(worker_list), 8)
-        for i <- [0..Kernel.trunc(len)] do
-            cond do
-                rem(1, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
-                rem(I, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
-                true -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.random(worker_list))
-            end#
+        m = roots(len)
+        n = 2*m-1
+        chunks = Enum.chunk_every(worker_list, n) # m chunks of length n
+        for i <- [1..m-1] do #build one hexagon at a time, overlapping on one edge
+            zip_hexagons(Enum.at(chunks, i), Enum.at(chunks, i-1))
         end
+        for worker in worker_list do
+            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.random(worker_list))
+        end
+        # len = Integer.floor_div(length(worker_list), 8)
+        # for i <- [0..Kernel.trunc(len)] do
+        #     cond do
+        #         rem(1, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
+        #         rem(I, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
+        #         true -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.random(worker_list))
+        #     end#
+        # end
     end
+
+    defp zip_hexagons(list1, list2) if length(list1)==length(list2) do # builds the honeycomb structure
+        p = Integer.floor_div(length(list1), 2)
+        for i <- [0..p-1], do: Project2.Server.add_neighbors(Enum.at(list1, i*2), Enum.at(list2, i*2))
+    end
+
 end
