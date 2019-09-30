@@ -38,14 +38,16 @@ defmodule Project2.Topology do
             %{pid: worker, x: :rand.uniform(1000), y: :rand.uniform(1000)} #.1 = 10
         end)
         worker_locations = Enum.sort_by worker_locations, &Map.fetch(&1, :x)
-        #Enum.map(worker_locations, fn worker ->
-        #end)
-        x_diff = 0
-        y_diff = 0
-        distance = :math.sqrt(:math.pow(x_diff, 2) + :math.pow(y_diff, 2))
-        #Search in bands across graph?
-        #Get neighbor list
-        #Send neighbor list
+        Enum.map(worker_locations, fn worker ->
+            for other_worker <- worker_locations do
+                x_diff = elem(Map.fetch(worker, :x), 1) - elem(Map.fetch(other_worker, :x), 1)
+                y_diff = elem(Map.fetch(worker, :y), 1) - elem(Map.fetch(other_worker, :y), 1)
+                distance = :math.sqrt(:math.pow(x_diff, 2) + :math.pow(y_diff, 2))
+                if (distance < 10) do #.1 = 10
+                    Project2.Server.add_neighbors(elem(Map.fetch(worker, :pid), 1), [elem(Map.fetch(other_worker, :pid), 1)])
+                end
+            end
+        end)
     end
 
     defp nth_root(n, x, precision \\ 1.0e-5) do # https://rosettacode.org/wiki/Nth_root#Elixir
@@ -83,7 +85,7 @@ defmodule Project2.Topology do
         end
     end
 
-    defp grid_connect(list), do: :ok
+    defp grid_connect(_list), do: :ok
 
     defp roots(p), do: (1.0+Math.sqrt(1.0+8.0*p))/4.0
 

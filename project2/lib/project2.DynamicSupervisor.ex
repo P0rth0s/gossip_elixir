@@ -34,9 +34,9 @@ defmodule Project2.DynamicSupervisor do
   def do_stuff do
     #Get vars from argv
     worker_list = create_workers([], 20)
-    Project2.Topology.build_topology("full network", worker_list)
-    #[hd, snd, thrd, tl | []] = worker_list
-    #Project2.Server.get_neighbors(thrd)
-    Project2.Server.begin_algorithm("Push Sum", worker_list)
+    Project2.Topology.build_topology("random 2d grid", worker_list)
+    [hd, snd, thrd | tl] = worker_list
+    Project2.Server.get_neighbors(thrd)
+    #Project2.Server.begin_algorithm("Push Sum", worker_list)
   end
 end
