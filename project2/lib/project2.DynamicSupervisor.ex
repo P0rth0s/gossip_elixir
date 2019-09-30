@@ -1,8 +1,8 @@
 defmodule Project2.DynamicSupervisor do
   use DynamicSupervisor
 
-  def start_link() do
-    DynamicSupervisor.start_link(__MODULE__, name: __MODULE__)
+  def start_link(args) do
+    DynamicSupervisor.start_link(__MODULE__, args, name: __MODULE__)
   end
 
   def start_child(id_num) do
@@ -10,7 +10,7 @@ defmodule Project2.DynamicSupervisor do
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
-  def init(_) do
+  def init(_args) do
     DynamicSupervisor.init(
       strategy: :one_for_one
     )
@@ -24,19 +24,9 @@ defmodule Project2.DynamicSupervisor do
         newlist = [pid | list]
         num = num - 1
         create_workers(newlist, num)
-      _ ->
-        IO.puts 'Error creating worker, Retrying'
-        create_workers(list, num)
+      other ->
+        other
     end
   end
 
-  #Use this for testing
-  def do_stuff do
-    #Get vars from argv
-    worker_list = create_workers([], 20)
-    Project2.Topology.build_topology("random 2d grid", worker_list)
-    [hd, snd, thrd | tl] = worker_list
-    Project2.Server.get_neighbors(thrd)
-    #Project2.Server.begin_algorithm("Push Sum", worker_list)
-  end
 end
