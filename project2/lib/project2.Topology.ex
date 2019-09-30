@@ -87,7 +87,7 @@ defmodule Project2.Topology do
 
     defp grid_connect(_list), do: :ok
 
-    defp roots(p), do: (1.0+Math.sqrt(1.0+8.0*p))/4.0
+    defp roots(p), do: (1.0+:math.sqrt(1.0+8.0*p))/4.0
 
     def honey_comb(worker_list) do
         len = Integer.floor_div(length(worker_list), 8)
