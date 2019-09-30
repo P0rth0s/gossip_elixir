@@ -48,17 +48,39 @@ defmodule Project2.Topology do
         #Send neighbor list
     end
 
+    defp nth_root(n, x, precision \\ 1.0e-5) do # https://rosettacode.org/wiki/Nth_root#Elixir
+        f = fn(prev) -> ((n - 1) * prev + x / :math.pow(prev, (n-1))) / n end
+        fixed_point(f, x, precision, f.(x))
+    end
+    defp fixed_point(_, guess, tolerance, next) when abs(guess - next) < tolerance, do: next
+    defp fixed_point(f, _, tolerance, next), do: fixed_point(f, next, tolerance, f.(next))
+
     def torus_grid_3d(worker_list) do
         #Cube but ends wrap
         len = Integer.floor_div(length(worker_list), 8)
-        for i <- [0..Kernel.trunc(len)] do
-            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
-            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-5, len)))
-            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+3, len)))
-            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-3, len)))
-            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
-            Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-1, len)))
+        p = Kernel.trunc(nth_root(3,len))
+        grid = Enum.map(Enum.chunk_every(worker_list, p), fn x -> Enum.chunk_every(x, p))
+        grid_connect(grid)
+        # for i <- [0..Kernel.trunc(len)] do
+        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
+        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-5, len)))
+        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+3, len)))
+        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-3, len)))
+        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
+        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-1, len)))
+        # end
+    end
+
+    defp grid_connect([h|t]) do
+        grid_connect(h)
+        grid_connect(t)
+        for x,y <- List.flatten(h), List.flatten(t) do
+            Project2.Server.add_neighbors(x,y)
         end
+    end
+
+    defp grid_connect(list) do
+        :ok
     end
 
     def honey_comb(worker_list) do
