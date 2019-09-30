@@ -16,6 +16,14 @@ defmodule Project2.DynamicSupervisor do
     )
   end
 
+  def count_children do
+    DynamicSupervisor.count_children(__MODULE__)
+  end
+
+  def terminate_child(pid) do
+    DynamicSupervisor.terminate_child(__MODULE__, pid)
+  end
+
   def create_workers(list, 0) do list end
   def create_workers(list, num) do
     agent = start_child(num)

@@ -71,10 +71,12 @@ defmodule Project2.Server do
             count < 10 ->
                 IO.puts 'continue'
                 pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
+                #IO.puts(inspect(self()))
+                #IO.puts(inspect(pid))
                 do_gossip(pid)
             true ->
                 IO.puts 'done'
-                # remove from neighbor list of others?
+                Project2.DynamicSupervisor.terminate_child(self())
         end
         {:noreply, state}
     end
@@ -101,9 +103,11 @@ defmodule Project2.Server do
                         {:noreply, state}
                     true ->
                         IO.puts 'terminate'
+                        Project2.DynamicSupervisor.terminate_child(self())
                         {:noreply, state}
                 end
             _ ->
+                IO.puts 'continue 2'
                 state = continue_push_sum(state, my_s, my_w)
                 {:noreply, state}
         end
@@ -115,6 +119,8 @@ defmodule Project2.Server do
         state = Map.put(state, :s, my_s)
         state = Map.put(state, :w, my_w)
         pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
+        #IO.puts(inspect(self()))
+        #IO.puts(inspect(pid))
         do_push_sum(pid, my_s, my_w)
         state
     end
