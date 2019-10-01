@@ -79,12 +79,12 @@ defmodule Project2.Topology do
         len = length(old_worker_list)
         new_worker_list = []
         if len < 8 do
-            new_worker_list = old_worker_list ++ Project2.DynamicSupervisor.create_workers([], 8-len)
+            new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 8-len)
         end
         if rem(len, 4) != 0 or  do
             new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 4-rem(len, 4))
         end
-        new_worker_list
+        old_worker_list ++ new_worker_list
     end
 
     defp honey_list_pad(old_worker_list) do
