@@ -39,7 +39,7 @@ defmodule Project2.Topology do
         end)
         worker_locations = Enum.sort_by worker_locations, &Map.fetch(&1, :x)
         Enum.map(worker_locations, fn worker ->
-            for other_worker <- worker_locations do
+            for other_worker <- worker_locations -- [worker] do
                 x_diff = elem(Map.fetch(worker, :x), 1) - elem(Map.fetch(other_worker, :x), 1)
                 y_diff = elem(Map.fetch(worker, :y), 1) - elem(Map.fetch(other_worker, :y), 1)
                 distance = :math.sqrt(:math.pow(x_diff, 2) + :math.pow(y_diff, 2))

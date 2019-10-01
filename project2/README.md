@@ -10,3 +10,4 @@ mix escript.build
 
 Run with:
 escript project2 num_nodes "topology" "algorithm"
+./project2 num_nodes "topology" "algorithm"

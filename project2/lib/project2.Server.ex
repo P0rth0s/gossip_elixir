@@ -38,7 +38,7 @@ defmodule Project2.Server do
         case algorithm do
             "Gossip" ->
                 do_gossip(pid)
-            "Push Sum"->
+            "Push_Sum"->
                 init_push_sum(worker_list, 1)
                 do_push_sum(pid, 0, 0)
             _ -> IO.puts 'Invalid algorithm'
@@ -69,10 +69,14 @@ defmodule Project2.Server do
         state = Map.put(state, :times_heard_rumor, count)
         cond do
             count < 10 ->
-                pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
-                #IO.puts(inspect(self()))
-                #IO.puts(inspect(pid))
-                do_gossip(pid)
+                if length(elem(Map.fetch(state, :neighbors), 1)) > 0 do
+                    pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
+                    #IO.puts(inspect(self()))
+                    #IO.puts(inspect(pid))
+                    do_gossip(pid)
+                else
+                    Project2.DynamicSupervisor.terminate_child(self())
+                end
             true ->
                 Project2.DynamicSupervisor.terminate_child(self())
         end
@@ -113,10 +117,14 @@ defmodule Project2.Server do
         my_w = my_w / 2
         state = Map.put(state, :s, my_s)
         state = Map.put(state, :w, my_w)
-        pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
-        #IO.puts(inspect(self()))
-        #IO.puts(inspect(pid))
-        do_push_sum(pid, my_s, my_w)
-        state
+        if length(elem(Map.fetch(state, :neighbors), 1)) > 0 do
+            pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
+            #IO.puts(inspect(self()))
+            #IO.puts(inspect(pid))
+            do_push_sum(pid, my_s, my_w)
+            state
+        else
+            Project2.DynamicSupervisor.terminate_child(self())
+        end
     end
 end
