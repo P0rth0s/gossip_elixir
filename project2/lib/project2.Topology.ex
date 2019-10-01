@@ -58,10 +58,7 @@ defmodule Project2.Topology do
     defp fixed_point(f, _, tolerance, next), do: fixed_point(f, next, tolerance, f.(next))
 
     def torus_grid_3d(old_worker_list) do
-        #IO.puts(old_worker_list)
-        # adjust work list length to be a grid
         worker_list = grid_list_pad(old_worker_list)
-        #IO.puts("hello1")
         len = Integer.floor_div(length(worker_list), 8)
         p = Kernel.trunc(nth_root(3,len))
         grid = Enum.map(Enum.chunk_every(worker_list, p), fn x -> Enum.chunk_every(x, p) end)
@@ -103,23 +100,16 @@ defmodule Project2.Topology do
 
     def honey_comb(old_worker_list) do
         worker_list = honey_list_pad(old_worker_list)
-        # IO.inspect(worker_list)
         len = length(worker_list)
         m = Kernel.trunc(2*roots(len)-1)
         n = Integer.floor_div(len, m)
-        # IO.inspect(len)
-        # IO.inspect(n)
-        # IO.inspect(worker_list)
-
         chunks = Enum.chunk_every(worker_list, n, m, :discard) # m chunks of length n
-        # IO.inspect(chunks)
         for chunk <- chunks do
             line(chunk)
         end
         other = Enum.drop(chunks, 1)
         for i <- chunks, j <- other do #build one hexagon at a time, overlapping on one edge
             zip_hexagons(i,j)
-            # IO.puts "Here1!!"
         end
     end
 
@@ -130,14 +120,12 @@ defmodule Project2.Topology do
         m = Kernel.trunc(2*roots(len)-1)
         n = Integer.floor_div(len, m)
         chunks = Enum.chunk_every(worker_list, n, m, :discard) # m chunks of length n
-        # IO.inspect("rando")
         for chunk <- chunks do
             line(chunk)
         end
         other = Enum.drop(chunks, 1)
         for i <- chunks, j <- other do #build one hexagon at a time, overlapping on one edge
             zip_hexagons(i,j)
-            # IO.puts "Here1!!"
         end
         for worker <- worker_list do
             Project2.Server.add_neighbors(worker, Enum.random(worker_list))
@@ -162,7 +150,6 @@ defmodule Project2.Topology do
 
     defp zip_hexagons(list1, list2) do # builds the honeycomb structure
         p = Integer.floor_div(length(list1), 2)
-        # IO.puts("HERE2")
         actors1 = Enum.drop_every(list1,2)
         actors2 = Enum.drop_every(list2,2)
         for i <- actors1, j <- actors2 do
