@@ -58,7 +58,9 @@ defmodule Project2.Topology do
     defp fixed_point(f, _, tolerance, next), do: fixed_point(f, next, tolerance, f.(next))
 
     def torus_grid_3d(worker_list) do
-        #Cube but ends wrap
+        if rem(length(worker_list), 4) != 0 or length(worker_list)<8 do
+            # TODO: Add more workers to make it a grid
+        end
         len = Integer.floor_div(length(worker_list), 8)
         p = Kernel.trunc(nth_root(3,len))
         grid = Enum.map(Enum.chunk_every(worker_list, p), fn x -> Enum.chunk_every(x, p) end)
@@ -74,12 +76,11 @@ defmodule Project2.Topology do
     end
 
     defp grid_connect([h|t]) do
-        cond do
-            length(h)!=length(t) -> IO.puts("oops1")
+        len = length(h)
+        if len!=length(t), do: -> IO.puts("Error. Attempting to connect asymmetric grid.")
         end
         grid_connect(h)
         grid_connect(t)
-        len = length(h)
         for i <- [0..len-1] do
             Project2.Server.add_neighbors(Enum.at(h, i),Enum.at(t, i))
         end
@@ -90,6 +91,9 @@ defmodule Project2.Topology do
     defp roots(p), do: (1.0+:math.sqrt(1.0+8.0*p))/4.0
 
     def honey_comb(worker_list) do
+        if rem(length(worker_list), 3) != 0 or length(worker_list)<6 do
+            # TODO: Add more workers to make it hexagonal
+        end
         len = Integer.floor_div(length(worker_list), 8)
         m = roots(len)
         n = 2*m-1
