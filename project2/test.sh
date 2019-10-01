@@ -9,12 +9,12 @@ do
     time ./project2 $i "line" Gossip
     echo "Random $i"
     time ./project2 $i "random_2d_grid" Gossip
-    echo "Torus"
+    echo "Torus $i"
     time ./project2  $i "torus_grid_3d" Gossip
-    echo "Honeycomb"
-    ./project2  $i "honeycomb" Gossip
-    echo "Honeycomb Random"
-    ./project2  $i "honeycomb_random" Gossip
+    echo "Honeycomb $i"
+    time ./project2  $i "honeycomb" Gossip
+    echo "Honeycomb Random $i"
+    time ./project2  $i "honeycomb_random" Gossip
 done
 
 echo "**********************"
