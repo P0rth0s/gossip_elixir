@@ -1,7 +1,7 @@
 #At 10,000 nodes might take a while to finish, be patient
 mix escript.build
 echo "Gossip"
-for i in 10 100 1000 5000 10000
+for i in 4 16 32 64 128 256 512 1024 2048
 do
     echo "Full Network $i"
     time ./project2 $i "full_network" Gossip
@@ -19,7 +19,7 @@ done
 
 echo "**********************"
 echo "Push Sum"
-for i in 10 100 1000 5000 10000
+for i in 4 16 32 64 128 256 512 1024 2048
 do
     echo "Full Network $i"
     time ./project2 $i "full_network" Push_Sum
