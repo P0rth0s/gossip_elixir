@@ -4,7 +4,7 @@ defmodule Project2.Topology do
             "full network" -> full_network(worker_list)
             "line" -> line(worker_list)
             "random 2d grid" -> random_2d_grid(worker_list)
-            "torud grid 3d" -> torus_grid_3d(worker_list)
+            "torus grid 3d" -> torus_grid_3d(worker_list)
             "honeycomb" -> honey_comb(worker_list)
             "honeycomb random" -> honey_comb_random(worker_list)
             _ -> IO.puts 'Error not a valid topology.'
@@ -57,10 +57,10 @@ defmodule Project2.Topology do
     defp fixed_point(_, guess, tolerance, next) when abs(guess - next) < tolerance, do: next
     defp fixed_point(f, _, tolerance, next), do: fixed_point(f, next, tolerance, f.(next))
 
-    def torus_grid_3d(worker_list) do
-        if rem(length(worker_list), 4) != 0 or length(worker_list)<8 do
-            # TODO: Add more workers to make it a grid
-        end
+    def torus_grid_3d(raw_worker_list) do
+        # adjust work list length to be a grid
+
+        worker_list = grid_list_pad(old_worker_list)
         len = Integer.floor_div(length(worker_list), 8)
         p = Kernel.trunc(nth_root(3,len))
         grid = Enum.map(Enum.chunk_every(worker_list, p), fn x -> Enum.chunk_every(x, p) end)
@@ -73,6 +73,30 @@ defmodule Project2.Topology do
         #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
         #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-1, len)))
         # end
+    end
+
+    defp grid_list_pad(old_worker_list) do
+        len = length(old_worker_list)
+        new_worker_list = []
+        if len < 8 do
+            new_worker_list = old_worker_list ++ Project2.DynamicSupervisor.create_workers([], 8-len)
+        end
+        if rem(len, 4) != 0 or  do
+            new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 4-rem(len, 4))
+        end
+        new_worker_list
+    end
+
+    defp honey_list_pad(old_worker_list) do
+        len = length(old_worker_list)
+        new_worker_list = []
+        if len < 6 do
+            new_worker_list = old_worker_list ++ Project2.DynamicSupervisor.create_workers([], 6-len)
+        end
+        if rem(len, 3) != 0 or  do
+            new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 3-rem(len, 3))
+        end
+        new_worker_list
     end
 
     defp grid_connect([h|t]) do
@@ -90,10 +114,9 @@ defmodule Project2.Topology do
 
     defp roots(p), do: (1.0+:math.sqrt(1.0+8.0*p))/4.0
 
-    def honey_comb(worker_list) do
-        if rem(length(worker_list), 3) != 0 or length(worker_list)<6 do
-            # TODO: Add more workers to make it hexagonal
-        end
+    def honey_comb(old_worker_list) do
+        # Adjust list length to make is all hexagons
+        worker_list = honey_list_pad(old_worker_list)
         len = Integer.floor_div(length(worker_list), 8)
         m = roots(len)
         n = 2*m-1
@@ -114,7 +137,9 @@ defmodule Project2.Topology do
         # end
     end
 
-    def honey_comb_random(worker_list) do
+    def honey_comb_random(old_worker_list) do
+        # Adjust list length to make is all hexagons
+        worker_list = honey_list_pad(old_worker_list)
         len = Integer.floor_div(length(worker_list), 8)
         m = roots(len)
         n = 2*m-1
