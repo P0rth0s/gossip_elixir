@@ -69,13 +69,11 @@ defmodule Project2.Server do
         state = Map.put(state, :times_heard_rumor, count)
         cond do
             count < 10 ->
-                IO.puts 'continue'
                 pid = Enum.random(elem(Map.fetch(state, :neighbors), 1))
                 #IO.puts(inspect(self()))
                 #IO.puts(inspect(pid))
                 do_gossip(pid)
             true ->
-                IO.puts 'done'
                 Project2.DynamicSupervisor.terminate_child(self())
         end
         {:noreply, state}
@@ -98,16 +96,13 @@ defmodule Project2.Server do
             [_hd, _snd, thrd | _] ->
                 cond do
                     sum_estimate - thrd < @push_sum_difference ->
-                        IO.puts 'continue'
                         state = continue_push_sum(state, my_s, my_w)
                         {:noreply, state}
                     true ->
-                        IO.puts 'terminate'
                         Project2.DynamicSupervisor.terminate_child(self())
                         {:noreply, state}
                 end
             _ ->
-                IO.puts 'continue 2'
                 state = continue_push_sum(state, my_s, my_w)
                 {:noreply, state}
         end
