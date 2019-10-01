@@ -66,18 +66,9 @@ defmodule Project2.Topology do
         p = Kernel.trunc(nth_root(3,len))
         grid = Enum.map(Enum.chunk_every(worker_list, p), fn x -> Enum.chunk_every(x, p) end)
         grid_connect(grid)
-        # for i <- [0..Kernel.trunc(len)] do
-        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
-        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-5, len)))
-        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+3, len)))
-        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-3, len)))
-        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
-        #     Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i-1, len)))
-        # end
     end
 
     defp grid_list_pad(old_worker_list) do
-        #IO.puts("grid2")
         len = length(old_worker_list)
         new_worker_list = []
         new_worker_list = if len < 8 do
@@ -90,9 +81,7 @@ defmodule Project2.Topology do
         else
             new_worker_list
         end
-        #IO.puts("grid3")
         old_worker_list ++ new_worker_list
-        #IO.puts(List.flatten(worker_list))
 
     end
 
@@ -104,6 +93,7 @@ defmodule Project2.Topology do
         grid_connect(t)
         for i <- h, j <- t do
             Project2.Server.add_neighbors(i,j)
+            Project2.Server.add_neighbors(j,i)
         end
     end
 
@@ -112,83 +102,72 @@ defmodule Project2.Topology do
     defp roots(p), do: (1.0+:math.sqrt(1.0+8.0*p))/4.0
 
     def honey_comb(old_worker_list) do
-        # Adjust list length to make is all hexagons
         worker_list = honey_list_pad(old_worker_list)
-        IO.puts("honey1")
-        len = Integer.floor_div(length(worker_list), 8)
-        m = roots(len)
-        n = 2*m-1
-        chunks = Enum.chunk_every(worker_list, n) # m chunks of length n
+        # IO.inspect(worker_list)
+        len = length(worker_list)
+        m = Kernel.trunc(2*roots(len)-1)
+        n = Integer.floor_div(len, m)
+        # IO.inspect(len)
+        # IO.inspect(n)
+        # IO.inspect(worker_list)
+
+        chunks = Enum.chunk_every(worker_list, n, m, :discard) # m chunks of length n
+        # IO.inspect(chunks)
         for chunk <- chunks do
             line(chunk)
         end
-        for i <- [1..m-1] do #build one hexagon at a time, overlapping on one edge
-            zip_hexagons(Enum.at(chunks, i), Enum.at(chunks, i-1))
+        other = Enum.drop(chunks, 1)
+        for i <- chunks, j <- other do #build one hexagon at a time, overlapping on one edge
+            zip_hexagons(i,j)
+            # IO.puts "Here1!!"
         end
-        # for i <- [0..Kernel.trunc(len)] do
-        #     cond do
-        #         rem(i, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
-        #     end
-        #     cond do
-        #         rem(i, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
-        #     end
-        # end
     end
 
     def honey_comb_random(old_worker_list) do
         # Adjust list length to make is all hexagons
         worker_list = honey_list_pad(old_worker_list)
-        len = Integer.floor_div(length(worker_list), 8)
-        m = roots(len)
-        n = 2*m-1
-        chunks = Enum.chunk_every(worker_list, n) # m chunks of length n
+       len = length(worker_list)
+        m = Kernel.trunc(2*roots(len)-1)
+        n = Integer.floor_div(len, m)
+        chunks = Enum.chunk_every(worker_list, n, m, :discard) # m chunks of length n
+        # IO.inspect("rando")
         for chunk <- chunks do
             line(chunk)
         end
-        for i <- [1..m-1] do #build one hexagon at a time, overlapping on one edge
-            zip_hexagons(Enum.at(chunks, i), Enum.at(chunks, i-1))
+        other = Enum.drop(chunks, 1)
+        for i <- chunks, j <- other do #build one hexagon at a time, overlapping on one edge
+            zip_hexagons(i,j)
+            # IO.puts "Here1!!"
         end
         for worker <- worker_list do
             Project2.Server.add_neighbors(worker, Enum.random(worker_list))
         end
-        # len = Integer.floor_div(length(worker_list), 8)
-        # for i <- [0..Kernel.trunc(len)] do
-        #     cond do
-        #         rem(1, 2)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+5, len)))
-        #         rem(I, 5)!=0 -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.at(worker_list, rem(i+1, len)))
-        #         true -> Project2.Server.add_neighbors(Enum.at(worker_list, i), Enum.random(worker_list))
-        #     end#
-        # end
     end
 
     defp honey_list_pad(old_worker_list) do
-        IO.puts("honey2")
         len = length(old_worker_list)
         new_worker_list = []
         new_worker_list = if len < 6 do
-            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 6-len)
+            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 8-len)
         else
             []
         end
-        if rem(len, 3) != 0 do
-             new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 3-rem(len, 3))
+        new_worker_list = if rem(len, 15) != 0 do
+            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 4-rem(len, 4))
         else
             new_worker_list
         end
-        #     []
-        # end
-        # new_worker_list = if rem(len, 3) != 0 do
-        #     new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 3-rem(len, 3))
-        # end
         old_worker_list ++ new_worker_list
-        IO.puts("honey3")
     end
 
-    defp zip_hexagons(list1, list2) when length(list1)==length(list2) do # builds the honeycomb structure
+    defp zip_hexagons(list1, list2) do # builds the honeycomb structure
         p = Integer.floor_div(length(list1), 2)
-        for i <- [0..p-1] do
-            Project2.Server.add_neighbors(Enum.at(list1, i*2), Enum.at(list2, i*2))
-            Project2.Server.add_neighbors(Enum.at(list2, i*2), Enum.at(list1, i*2))
+        # IO.puts("HERE2")
+        actors1 = Enum.drop_every(list1,2)
+        actors2 = Enum.drop_every(list2,2)
+        for i <- actors1, j <- actors2 do
+            Project2.Server.add_neighbors(i,j)
+            Project2.Server.add_neighbors(j,i)
         end
     end
 
