@@ -1,12 +1,12 @@
 defmodule Project2.Topology do
     def build_topology(top, worker_list) do
         case top do
-            "full network" -> full_network(worker_list)
+            "full_network" -> full_network(worker_list)
             "line" -> line(worker_list)
-            "random 2d grid" -> random_2d_grid(worker_list)
-            "torus grid 3d" -> torus_grid_3d(worker_list)
+            "random_2d_grid" -> random_2d_grid(worker_list)
+            "torus_grid_3d" -> torus_grid_3d(worker_list)
             "honeycomb" -> honey_comb(worker_list)
-            "honeycomb random" -> honey_comb_random(worker_list)
+            "honeycomb_random" -> honey_comb_random(worker_list)
             _ -> IO.puts 'Error not a valid topology.'
         end
     end
@@ -57,10 +57,11 @@ defmodule Project2.Topology do
     defp fixed_point(_, guess, tolerance, next) when abs(guess - next) < tolerance, do: next
     defp fixed_point(f, _, tolerance, next), do: fixed_point(f, next, tolerance, f.(next))
 
-    def torus_grid_3d(raw_worker_list) do
-        # adjust work list length to be a grid
+    def torus_grid_3d(old_worker_list) do
 
+        # adjust work list length to be a grid
         worker_list = grid_list_pad(old_worker_list)
+        IO.puts("hello1")
         len = Integer.floor_div(length(worker_list), 8)
         p = Kernel.trunc(nth_root(3,len))
         grid = Enum.map(Enum.chunk_every(worker_list, p), fn x -> Enum.chunk_every(x, p) end)
@@ -78,31 +79,30 @@ defmodule Project2.Topology do
     defp grid_list_pad(old_worker_list) do
         len = length(old_worker_list)
         new_worker_list = []
-        if len < 8 do
-            new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 8-len)
+        new_worker_list = if len < 8 do
+            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 8-len)
         end
-        if rem(len, 4) != 0 or  do
-            new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 4-rem(len, 4))
+        new_worker_list = if rem(len, 4) != 0 do
+            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 4-rem(len, 4))
         end
-        old_worker_list ++ new_worker_list
+        List.flatten(old_worker_list ++ new_worker_list)
     end
 
     defp honey_list_pad(old_worker_list) do
         len = length(old_worker_list)
         new_worker_list = []
-        if len < 6 do
-            new_worker_list = old_worker_list ++ Project2.DynamicSupervisor.create_workers([], 6-len)
+        new_worker_list = if len < 6 do
+            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 6-len)
         end
-        if rem(len, 3) != 0 or  do
-            new_worker_list = new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 3-rem(len, 3))
+        new_worker_list = if rem(len, 3) != 0 do
+            new_worker_list ++ Project2.DynamicSupervisor.create_workers([], 3-rem(len, 3))
         end
-        new_worker_list
+        List.flatten(old_worker_list ++ new_worker_list)
     end
 
     defp grid_connect([h|t]) do
         len = length(h)
-        if len!=length(t), do: -> IO.puts("Error. Attempting to connect asymmetric grid.")
-        end
+        if len != length(t), do: IO.puts("Error. Attempting to connect asymmetric grid.")
         grid_connect(h)
         grid_connect(t)
         for i <- [0..len-1] do
