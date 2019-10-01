@@ -1,7 +1,7 @@
 # Project2
 
 # Written By
-Lee Deffebach 6448-5421
+Harry Deffebach 6448-5421
 Alexander Banard 1149-9964
 
 # How to run
@@ -11,3 +11,5 @@ mix escript.build
 Run with:
 escript project2 num_nodes "topology" "algorithm"
 ./project2 num_nodes "topology" "algorithm"
+
+# Graph
